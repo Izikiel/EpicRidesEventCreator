@@ -73,7 +73,7 @@ function parseVancouverTrip(email: GoogleAppsScript.Gmail.GmailThread): Trip {
   const vancouver = "Departure to Vancouver";
   return parseTrip(vancouver, email);
 }
-
+// Entry point of the application
 function createTrips() {
   let tripHandlers = [parseWhistlerTrip, parseVancouverTrip];
 
