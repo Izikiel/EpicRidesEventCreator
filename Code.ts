@@ -52,24 +52,24 @@ class Trip {
 }
 
 function getUnreadEpicRidesEmails(): GoogleAppsScript.Gmail.GmailThread[] {
-  return GmailApp.search('from:(@epicrides.ca)').filter(gmailThread => gmailThread.isUnread());
+  return GmailApp
+    .search('from:(@epicrides.ca)')
+    .filter(gmailThread => gmailThread.isUnread());
 }
 
-function parseTrip(destination: string, email: GoogleAppsScript.Gmail.GmailThread): Trip {
-  let message = email.getMessages()[0];
-
+function parseTrip(destination: string, message: GoogleAppsScript.Gmail.GmailMessage): Trip {
   let body = message.getPlainBody().split("\n");
 
   let destinationInfo = body.filter(s => s.search(destination) > 0)[0];
   return new Trip(destinationInfo);
 }
 
-function parseWhistlerTrip(email: GoogleAppsScript.Gmail.GmailThread): Trip {
+function parseWhistlerTrip(email: GoogleAppsScript.Gmail.GmailMessage): Trip {
   const whistler = "Departure to Whistler";
   return parseTrip(whistler, email);
 }
 
-function parseVancouverTrip(email: GoogleAppsScript.Gmail.GmailThread): Trip {
+function parseVancouverTrip(email: GoogleAppsScript.Gmail.GmailMessage): Trip {
   const vancouver = "Departure to Vancouver";
   return parseTrip(vancouver, email);
 }
@@ -78,8 +78,10 @@ function createTrips() {
   let tripHandlers = [parseWhistlerTrip, parseVancouverTrip];
 
   for (const email of getUnreadEpicRidesEmails()) {
-    for (const handler of tripHandlers) {
-      handler(email).createEvent();
+    for (const message of email.getMessages().filter(m => m.isUnread())) {
+      for (const handler of tripHandlers) {
+        handler(message).createEvent();
+      }
     }
     email.markRead();
     email.moveToArchive();
